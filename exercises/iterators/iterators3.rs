@@ -9,7 +9,6 @@
 // Execute `rustlings hint iterators3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum DivisionError {
@@ -26,23 +25,51 @@ pub struct NotDivisibleError {
 // Calculate `a` divided by `b` if `a` is evenly divisible by `b`.
 // Otherwise, return a suitable error.
 pub fn divide(a: i32, b: i32) -> Result<i32, DivisionError> {
-    todo!();
+    if b == 0 {
+        Err(DivisionError::DivideByZero)
+    } else {
+        let result = a / b;
+        if result * b == a {
+            Ok(result)
+        } else {
+            Err(DivisionError::NotDivisible(NotDivisibleError{
+                dividend: a,
+                divisor: b,
+            }))
+        }
+    }
 }
 
 // Complete the function and return a value of the correct type so the test
 // passes.
 // Desired output: Ok([1, 11, 1426, 3])
-fn result_with_list() -> () {
+fn result_with_list() -> Result<Vec<i32>, DivisionError> {
     let numbers = vec![27, 297, 38502, 81];
-    let division_results = numbers.into_iter().map(|n| divide(n, 27));
+    let division_results: Vec<Result<i32, DivisionError>> = numbers.into_iter().map(|n| divide(n, 27)).collect();
+    let mut map_error: Option<DivisionError> = None;
+    let mut result: Vec<i32> = division_results.into_iter().map(|value| {
+        match value {
+            Ok(num) => num,
+            Err(error) => {
+                map_error = Some(error);
+                0
+            }
+        }
+    }).collect();
+    if let Some(error) = map_error {
+        Err(error)
+    } else {
+        Ok(result)
+    }
 }
 
 // Complete the function and return a value of the correct type so the test
 // passes.
 // Desired output: [Ok(1), Ok(11), Ok(1426), Ok(3)]
-fn list_of_results() -> () {
+fn list_of_results() -> Vec<Result<i32, DivisionError>> {
     let numbers = vec![27, 297, 38502, 81];
     let division_results = numbers.into_iter().map(|n| divide(n, 27));
+    division_results.into_iter().map(|value| value).collect()
 }
 
 #[cfg(test)]
